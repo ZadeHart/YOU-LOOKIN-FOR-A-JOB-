@@ -1,57 +1,109 @@
-import { useState, useEffect } from 'react';
-import { searchGithub, searchGithubUser } from '../api/API';
+import { 
+  useState, 
+  useEffect } from 'react';
+import { 
+  searchGithub,
+  searchGithubUser
+ } from '../api/API';
 import type Candidate from '../interfaces/Candidate.interface';
 
 const CandidateSearch = () => {
-  const [currentCandidate, setCurrentCandidate] =useState<Candidate>({
-    name: '',
-    userName: '', 
-    location: '',
-    email: '',
-    company: '',
-    bio: '',
-  });
 
-  const addCandidate = () => {
+    const [ listOfCandidates, setListOfCandidates ] =useState<Candidate[]>([])
+    const [ loadingData, setLoadingData ] = useState<boolean>(true)
+    const [ currentIndex, setCurrentIndex ] = useState<number>(0)
+    const [ currentUser, setCurrentUser ] = useState<Candidate>({
+    name: null,
+    login: null, 
+    location: null,
+    avatar_url: '',
+    email: null,
+    company: null,
+    bio: null,
+
+    })
+
+  const addToCandidateList = () => {
     let parsedCandidates: Candidate[] = [];
     const storedCandidates = localStorage.getItem('candidates');
     if (typeof storedCandidates === 'string') {
       parsedCandidates = JSON.parse(storedCandidates);
     }
-    parsedCandidates.push(currentCandidate);
+    parsedCandidates.push(currentUser);
     localStorage.setItem('candidates', JSON.stringify(parsedCandidates))
+    nextCandidate()
   };
 
-  const skipCandidate = () => {
+  const nextCandidate = () => {
+    setCurrentIndex(currentIndex + 1)
+    getSingleGithubUser()
+  }
+
+  const getSingleGithubUser = async () => {
+    console.log(listOfCandidates, currentIndex)
+    const data = await searchGithubUser(listOfCandidates[currentIndex].login as string)
+    console.log('Data', data)
+
+    setCurrentUser(data)
 
   }
 
-    const searchForGithubName = async () => {
-      event.preventDefault();
-      const data: Candidate = await searchGithub();
+  const getAllGithubUsers = async () => {
+    const response = await searchGithub()
+    if (response) {
 
-      setCurrentCandidate(data);
-  };
+      setListOfCandidates(response)
+
+      setLoadingData(false)
+    }
+
+  }
+  useEffect(() => {
+    getAllGithubUsers()
+    getSingleGithubUser()
+
+  },[loadingData])
+
 
   return (
-    <body>
+    <div>
       <h1>Candidate Search</h1>
 
+      <div>
+        <img src={currentUser?.avatar_url}>
+        </img> 
+      <p>
+              <strong>Username:</strong> {currentUser?.login}
+            </p>
+            <p>
+              <strong>Location:</strong> {currentUser?.location}
+            </p>
+            <p>
+              <strong>Email:</strong> {currentUser?.email}
+            </p>
+            <p>
+              <strong>Company:</strong> {currentUser?.company}
+            </p>
+            <p>
+              <strong>Bio:</strong> {currentUser?.bio}
+            </p>
       <button
       className='button'
-      onClick={skipCandidate}
+      onClick={nextCandidate}
       >
         ➖
       </button>
 
       <button
       className='button'
-      onClick={addCandidate}
+      onClick={addToCandidateList}
       >
         ➕
       </button>
 
-    </body>
+      </div>
+
+    </div>
   );
 }
 
