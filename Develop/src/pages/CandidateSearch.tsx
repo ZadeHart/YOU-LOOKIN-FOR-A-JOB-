@@ -13,13 +13,13 @@ const CandidateSearch = () => {
     const [ loadingData, setLoadingData ] = useState<boolean>(true)
     const [ currentIndex, setCurrentIndex ] = useState<number>(0)
     const [ currentUser, setCurrentUser ] = useState<Candidate>({
-    name: null,
-    login: null, 
-    location: null,
+    name: '',
+    login: '', 
+    location: '',
     avatar_url: '',
-    email: null,
-    company: null,
-    bio: null,
+    email: '',
+    company: '',
+    bio: '',
 
     })
 
